@@ -1,0 +1,73 @@
+$out_background: #000000;
+$in_background: #111111;
+$border: #222222;
+$input_border: #333333;
+$primary_color: #00FF88;
+$secondary_text: #555555;
+$input_background: #1a1a1a;
+
+
+Screen {
+    background: $out_background;
+    align: center middle;
+}
+
+StartScreen {
+    width: 100;
+    height: auto;
+    border: tall $border;
+    background: $in_background;
+    padding: 2 4;
+}
+
+#center-container {
+    align: center middle;
+}
+
+#app-title {
+    width: 100%;
+    content-align: center middle;
+    color: $primary_color;
+    text-style: bold;
+    padding: 1;
+}
+
+#app-description {
+    width: 100%;
+    content-align: center middle;
+    color: $secondary_text;
+    margin-bottom: 2;
+}
+
+Input {
+    background: $input_background;
+    border: tall $input_border;
+    color: white;
+    margin-bottom: 1;
+}
+
+Input:focus {
+    border: tall  $primary_color;
+}
+
+#action-bar {
+    height: 3;
+    align: center middle;
+}
+
+Button {
+    width: 24;
+    margin: 0 1;
+}
+
+#btn-host {
+    background:  $primary_color;
+    color: black;
+    text-style: bold;
+}
+
+#btn-join {
+    background: $input_background;
+    color:  $primary_color;
+    border: solid  $primary_color;
+}
