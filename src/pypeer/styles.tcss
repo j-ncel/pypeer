@@ -71,3 +71,8 @@ Button {
     color:  $primary_color;
     border: solid  $primary_color;
 }
+
+#btn-join:hover {
+    background: $primary_color;
+    color: black;
+}
