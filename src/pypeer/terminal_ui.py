@@ -90,12 +90,18 @@ class PyPeer(App):
 
         self.start_engine(room_id, is_host=True)
 
+        self.attempts = 0
+
         async def check_ice_status():
+            self.attempts += 1
             if self.engine and self.engine.pc.iceGatheringState == "complete":
                 loader.add_class("hidden")
                 status.update("[cyan]Room Ready![/] Share this code:")
                 room_code.update(room_id)
                 room_code.remove_class("hidden")
+            elif self.attempts > 150:
+                loader.add_class("hidden")
+                status.update("[red]Failed to create room. Check connection.[/]")
             else:
                 self.set_timer(0.2, check_ice_status)
 
