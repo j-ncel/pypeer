@@ -12,15 +12,10 @@ Screen {
     align: center middle;
 }
 
-StartScreen {
-    width: 100;
-    height: auto;
+#center-container {
     border: tall $border;
     background: $in_background;
     padding: 2 4;
-}
-
-#center-container {
     align: center middle;
 }
 
@@ -29,7 +24,7 @@ StartScreen {
     content-align: center middle;
     color: $primary_color;
     text-style: bold;
-    padding: 1;
+    margin: 1;
 }
 
 #app-description {
@@ -39,40 +34,88 @@ StartScreen {
     margin-bottom: 2;
 }
 
-Input {
-    background: $input_background;
-    border: tall $input_border;
-    color: white;
+#host-view, #join-view {
+    align: center middle;
+    content-align: center middle;
+    width: 100%;
+    height: auto;
+}
+
+#status-label, #join-status {
+    content-align: center middle;
     margin-bottom: 1;
 }
 
+Input {
+    width: 100%;
+    background: $input_background;
+    border: tall $input_border;
+    color: white;
+    margin: 1;
+    content-align: center middle;
+}
+
 Input:focus {
-    border: tall  $primary_color;
+    border: tall $primary_color;
 }
 
 #action-bar {
-    height: 3;
+    height: 4;
     align: center middle;
 }
 
 Button {
-    width: 24;
-    margin: 0 1;
+    width: 30;
+    height: 3;
+    margin: 1;
+    border: none;
+    background: $input_background;
+    color: white;
 }
 
-#btn-host {
-    background:  $primary_color;
+#btn-host, #btn-connect {
+    background: $primary_color;
     color: black;
     text-style: bold;
 }
 
-#btn-join {
-    background: $input_background;
-    color:  $primary_color;
-    border: solid  $primary_color;
+#join-code-input {
+    width: 30;
 }
 
-#btn-join:hover {
-    background: $primary_color;
-    color: black;
+#btn-join {
+    color: $primary_color;
+    border: tall $primary_color;
+}
+
+#btn-back {
+    margin-top: 2;
+    width: 30;
+    background: $input_background;
+    color: $secondary_text;
+    margin: 1;
+}
+
+#btn-back:hover {
+    border: tall $primary_color;
+}
+
+#host-code-display {
+    width: 32;
+    background: $input_background;
+    color: $primary_color;
+    text-align: center;
+    padding: 1;
+    text-style: bold;
+}
+
+LoadingIndicator {
+    width: 32;
+    color: $primary_color;
+    height: 3;
+    margin: 1 0;
+}
+
+.hidden {
+    display: none;
 }
