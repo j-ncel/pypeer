@@ -86,7 +86,7 @@ Button {
     text-style: bold;
 }
 
-#btn-join:hover {
+#btn-join:hover, #btn-send:hover {
     background: $primary_color;
     color: black;
     text-style: bold;
@@ -97,7 +97,7 @@ Button {
     width: 30;
 }
 
-#btn-join {
+#btn-join, #btn-send {
     color: $primary_color;
     border: tall $primary_color;
 }
@@ -132,4 +132,24 @@ LoadingIndicator {
 
 .hidden {
     display: none;
+}
+
+#chat-main {
+    height: 100%;
+    padding: 2;
+    border: tall $input_border;
+}
+
+#messages-log {
+    height: 1fr;
+    padding: 1;
+}
+
+#input-container {
+    height: 4;
+    margin-top: 1;
+}
+
+#message-input {
+    width: 1fr;
 }

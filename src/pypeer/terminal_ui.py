@@ -1,6 +1,6 @@
 import asyncio
 from textual.app import App, ComposeResult
-from textual.widgets import Header, Footer, Input, Button, Label, LoadingIndicator
+from textual.widgets import Header, Footer, Input, Button, Label, LoadingIndicator, RichLog
 from textual.containers import Horizontal, Vertical, Container
 from textual.screen import Screen
 
@@ -51,6 +51,18 @@ class JoinScreen(Screen):
         yield Footer()
 
 
+class MessagingScreen(Screen):
+    def compose(self) -> ComposeResult:
+        yield Header(show_clock=True, icon="P")
+        with Horizontal(id="center-container"):
+            with Vertical(id="chat-main"):
+                yield RichLog(id="messages-log", auto_scroll=True, markup=True)
+                with Horizontal(id="input-container"):
+                    yield Input(placeholder="Type your message...", id="message-input")
+                    yield Button("Send", id="btn-send", variant="primary")
+        yield Footer()
+
+
 class PyPeer(App):
     TITLE = "pypeer"
     CSS_PATH = "styles.tcss"
@@ -80,6 +92,10 @@ class PyPeer(App):
             room_id = room_input.value.strip().upper()
             if len(room_id) == 6:
                 await self.run_join_sequence(room_id, self.screen)
+
+        elif event.button.id == "btn-send":
+            input_widget = self.screen.query_one("#message-input", Input)
+            await self.on_input_submitted(Input.Submitted(input_widget, input_widget.value))
 
     async def run_host_sequence(self, room_id: str, screen: Screen):
         status = screen.query_one("#status-label", Label)
@@ -119,6 +135,7 @@ class PyPeer(App):
         signaler = FirebaseSignaler(FIREBASE_DB_URL, room_id)
         self.engine = RTCEngine(signaler)
         self.engine.on_status_callback = self.handle_status_change
+        self.engine.on_message_callback = self.handle_incoming_message
 
         if is_host:
             asyncio.create_task(self.engine.setup_as_host())
@@ -126,14 +143,30 @@ class PyPeer(App):
             asyncio.create_task(self.engine.setup_as_peer())
 
     def handle_status_change(self, status: str) -> None:
-        if status == "Connected":
-            try:
-                self.screen.query_one("#join-loading").add_class("hidden")
-                self.screen.query_one("#join-status").update("[cyan]Connected![/]")
-            except Exception:
-                pass
+        if status == "Live" or status == "Connected":
+            if not isinstance(self.screen, MessagingScreen):
+                chat_screen = MessagingScreen()
+                self.push_screen(chat_screen)
 
         self.notify(f"PYPEER: {status}", title="Network Sync")
+
+    def handle_incoming_message(self, message: str) -> None:
+        try:
+            msg = self.screen.query_one("#messages-log", RichLog)
+            msg.write(f"[bold magenta]Peer:[/] {message}")
+        except Exception:
+            pass
+
+    async def on_input_submitted(self, event: Input.Submitted) -> None:
+        if event.input.id == "message-input":
+            message = event.value.strip()
+            if message and self.engine:
+                self.engine.send_message(message)
+
+                msg = self.screen.query_one("#messages-log", RichLog)
+                msg.write(f"[bold green]You:[/] {message}")
+
+                event.input.value = ""
 
 
 if __name__ == "__main__":
