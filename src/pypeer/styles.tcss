@@ -79,6 +79,20 @@ Button {
     text-style: bold;
 }
 
+#btn-host:hover {
+    background: $input_background;
+    border: tall $primary_color;
+    color: $primary_color;
+    text-style: bold;
+}
+
+#btn-join:hover {
+    background: $primary_color;
+    color: black;
+    text-style: bold;
+}
+
+
 #join-code-input {
     width: 30;
 }
