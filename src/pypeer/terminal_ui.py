@@ -29,6 +29,7 @@ class HostScreen(Screen):
             yield Label("PYPEER", id="app-title")
             yield Label("Python Terminal P2P Messaging", id="app-description")
             with Vertical(id="host-view"):
+                yield LoadingIndicator(id="host-loading")
                 yield Label("Creating Room...", id="status-label")
                 yield Label("", id="host-code-display", classes="hidden")
                 yield Button("Cancel", id="btn-back")
@@ -82,15 +83,23 @@ class PyPeer(App):
 
     async def run_host_sequence(self, room_id: str, screen: Screen):
         status = screen.query_one("#status-label", Label)
+        loader = screen.query_one("#host-loading", LoadingIndicator)
+        room_code = screen.query_one("#host-code-display", Label)
 
         status.update("Gathering ICE Candidates...")
-        status.update("[cyan]Room Ready![/] Share this code:")
-
-        room_code = screen.query_one("#host-code-display", Label)
-        room_code.remove_class("hidden")
-        room_code.update(room_id)
 
         self.start_engine(room_id, is_host=True)
+
+        async def check_ice_status():
+            if self.engine and self.engine.pc.iceGatheringState == "complete":
+                loader.add_class("hidden")
+                status.update("[cyan]Room Ready![/] Share this code:")
+                room_code.update(room_id)
+                room_code.remove_class("hidden")
+            else:
+                self.set_timer(0.2, check_ice_status)
+
+        await check_ice_status()
 
     async def run_join_sequence(self, room_id: str, screen: Screen):
         screen.query_one("#join-code-input").add_class("hidden")
