@@ -33,6 +33,11 @@ class PyPeer(App):
             await self.push_screen(JoinScreen())
 
         elif event.button.id == "btn-back":
+
+            if self.engine:
+                self.notify("Cancelling and cleaning up room...", title="PYPEER")
+                asyncio.create_task(self.cleanup_engine())
+
             self.pop_screen()
 
         elif event.button.id == "btn-connect":
@@ -95,6 +100,10 @@ class PyPeer(App):
             if not isinstance(self.screen, MessagingScreen):
                 chat_screen = MessagingScreen()
                 self.push_screen(chat_screen)
+        elif status in ["Closed", "Failed", "Disconnected"]:
+            if isinstance(self.screen, MessagingScreen):
+                self.notify("Connection lost. Returning to home.", severity="error")
+                self.pop_screen()
 
         self.notify(f"PYPEER: {status}", title="Network Sync")
 
@@ -115,6 +124,20 @@ class PyPeer(App):
                 msg.write(f"[bold green]You:[/] {message}")
 
                 event.input.value = ""
+
+    async def cleanup_engine(self) -> None:
+        """Helper to safely cancel and close the engine."""
+        if self.engine:
+            try:
+                await self.engine.signaler.clear_room()
+                await self.engine.close()
+            except Exception as e:
+                self.log(f"Cleanup error: {e}")
+            finally:
+                self.engine = None
+
+    async def on_unmount(self) -> None:
+        await self.cleanup_engine()
 
 
 if __name__ == "__main__":

@@ -20,7 +20,7 @@ class RTCEngine:
             state = self.pc.connectionState
             if self.on_status_callback:
                 self.on_status_callback(state.capitalize())
-            if state in ["failed", "closed"]:
+            if state in ["failed", "closed", "disconnected"]:
                 await self.close()
 
     async def setup_as_host(self, timeout: int = 60):
@@ -101,6 +101,21 @@ class RTCEngine:
     async def close(self):
         """Clean resource teardown."""
         if self.channel:
-            self.channel.close()
-        await self.pc.close()
-        await self.signaler.close()
+            try:
+                self.channel.close()
+            except:
+                pass
+            self.channel = None
+
+        if self.pc:
+            try:
+                await self.pc.close()
+            except:
+                pass
+            self.pc = None
+
+        if self.signaler:
+            try:
+                await self.signaler.close()
+            except:
+                pass
