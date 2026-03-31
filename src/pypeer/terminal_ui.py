@@ -4,63 +4,15 @@ from textual.widgets import Header, Footer, Input, Button, Label, LoadingIndicat
 from textual.containers import Horizontal, Vertical, Container
 from textual.screen import Screen
 
+from screens.start import StartScreen
+from screens.host import HostScreen
+from screens.join import JoinScreen
+from screens.chat import MessagingScreen
+
 from engine.firebase_sync import FirebaseSignaler
 from engine.rtc_engine import RTCEngine
 from constants import FIREBASE_DB_URL
 from utils.id_generator import generate_room_id
-
-
-class StartScreen(Screen):
-    def compose(self) -> ComposeResult:
-        yield Header(show_clock=True, icon="P")
-        with Container(id="center-container"):
-            yield Label("PYPEER", id="app-title")
-            yield Label("Python Terminal P2P Messaging", id="app-description")
-            with Horizontal(id="action-bar"):
-                yield Button("Host a Room", id="btn-host")
-                yield Button("Join a Room", id="btn-join")
-        yield Footer()
-
-
-class HostScreen(Screen):
-    def compose(self) -> ComposeResult:
-        yield Header(show_clock=True, icon="P")
-        with Container(id="center-container"):
-            yield Label("PYPEER", id="app-title")
-            yield Label("Python Terminal P2P Messaging", id="app-description")
-            with Vertical(id="host-view"):
-                yield LoadingIndicator(id="host-loading")
-                yield Label("Creating Room...", id="status-label")
-                yield Label("", id="host-code-display", classes="hidden")
-                yield Button("Cancel", id="btn-back")
-        yield Footer()
-
-
-class JoinScreen(Screen):
-    def compose(self) -> ComposeResult:
-        yield Header(show_clock=True, icon="P")
-        with Container(id="center-container"):
-            yield Label("PYPEER", id="app-title")
-            yield Label("Python Terminal P2P Messaging", id="app-description")
-            with Vertical(id="join-view"):
-                yield Input(placeholder="Enter Room ID", id="join-code-input", max_length=6)
-                yield Button("Connect", id="btn-connect")
-                yield Label("Connecting to signaling server...", id="join-status", classes="hidden")
-                yield LoadingIndicator(id="join-loading", classes="hidden")
-                yield Button("Back", id="btn-back")
-        yield Footer()
-
-
-class MessagingScreen(Screen):
-    def compose(self) -> ComposeResult:
-        yield Header(show_clock=True, icon="P")
-        with Horizontal(id="center-container"):
-            with Vertical(id="chat-main"):
-                yield RichLog(id="messages-log", auto_scroll=True, markup=True)
-                with Horizontal(id="input-container"):
-                    yield Input(placeholder="Type your message...", id="message-input")
-                    yield Button("Send", id="btn-send", variant="primary")
-        yield Footer()
 
 
 class PyPeer(App):
@@ -143,7 +95,7 @@ class PyPeer(App):
             asyncio.create_task(self.engine.setup_as_peer())
 
     def handle_status_change(self, status: str) -> None:
-        if status == "Live" or status == "Connected":
+        if status in ["Live", "Connected"]:
             if not isinstance(self.screen, MessagingScreen):
                 chat_screen = MessagingScreen()
                 self.push_screen(chat_screen)
