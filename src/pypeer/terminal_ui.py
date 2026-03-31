@@ -13,7 +13,7 @@ class PyPeer(App):
     CSS_PATH = "styles.tcss"
 
     BINDINGS = [
-        ("ctrl+q", "quit", "Quit"),
+        ("ctrl+q", "exit", "Quit"),
         ("escape", "back", "Back"),
     ]
 
@@ -46,6 +46,11 @@ class PyPeer(App):
             self.pop_screen()
         else:
             self.exit()
+
+    async def action_exit(self) -> None:
+        self.notify("Shutting down...", title="PYPEER")
+        await self.cleanup_engine()
+        self.exit()
 
     def handle_status_change(self, status: str) -> None:
         success_states = ["Live", "Connected"]
@@ -80,8 +85,9 @@ class PyPeer(App):
             engine_to_clean = self.engine
             self.engine = None
             try:
-                await asyncio.shield(engine_to_clean.signaler.clear_room())
-                await engine_to_clean.close()
+                async with asyncio.timeout(2.0):
+                    await engine_to_clean.signaler.clear_room()
+                    await engine_to_clean.close()
             except Exception as e:
                 self.log(f"Cleanup error: {e}")
 
