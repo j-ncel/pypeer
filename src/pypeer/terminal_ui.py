@@ -12,6 +12,11 @@ class PyPeer(App):
     TITLE = "pypeer"
     CSS_PATH = "styles.tcss"
 
+    BINDINGS = [
+        ("ctrl+q", "quit", "Quit"),
+        ("escape", "back", "Back"),
+    ]
+
     def __init__(self):
         super().__init__()
         self.engine = None
@@ -31,17 +36,24 @@ class PyPeer(App):
             await self.push_screen(JoinScreen())
 
         elif event.button.id == "btn-back":
+            await self.action_back()
 
-            if self.engine:
-                self.notify("Cleaning up session...", title="PYPEER")
-                asyncio.create_task(self.cleanup_engine())
-
+    async def action_back(self) -> None:
+        if self.engine:
+            self.notify("Cleaning up session...", title="PYPEER")
+            asyncio.create_task(self.cleanup_engine())
+        if len(self.screen_stack) > 1:
             self.pop_screen()
+        else:
+            self.exit()
 
     def handle_status_change(self, status: str) -> None:
         success_states = ["Live", "Connected"]
         failure_states = ["Closed", "Failed", "Disconnected"]
         pending_states = ["Gathering", "Connecting", "Signaling"]
+
+        if not self._is_mounted or not self.screen_stack:
+            return
 
         if status in success_states:
             if not isinstance(self.screen, MessagingScreen):
