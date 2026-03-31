@@ -33,20 +33,10 @@ class PyPeer(App):
         elif event.button.id == "btn-back":
 
             if self.engine:
-                self.notify("Cancelling and cleaning up room...", title="PYPEER")
+                self.notify("Cleaning up session...", title="PYPEER")
                 asyncio.create_task(self.cleanup_engine())
 
             self.pop_screen()
-
-        elif event.button.id == "btn-connect":
-            room_input = self.screen.query_one("#join-code-input", Input)
-            room_id = room_input.value.strip().upper()
-            if len(room_id) == 6:
-                self.manager.run_join_sequence(room_id, self.screen)
-
-        elif event.button.id == "btn-send":
-            input_widget = self.screen.query_one("#message-input", Input)
-            await self.on_input_submitted(Input.Submitted(input_widget, input_widget.value))
 
     def handle_status_change(self, status: str) -> None:
         success_states = ["Live", "Connected"]
@@ -70,22 +60,7 @@ class PyPeer(App):
 
     def handle_incoming_message(self, message: str) -> None:
         if isinstance(self.screen, MessagingScreen):
-            try:
-                msg = self.screen.query_one("#messages-log", RichLog)
-                msg.write(f"[bold magenta]Peer:[/] {message}")
-            except Exception:
-                pass
-
-    async def on_input_submitted(self, event: Input.Submitted) -> None:
-        if event.input.id == "message-input":
-            message = event.value.strip()
-            if message and self.engine:
-                self.engine.send_message(message)
-
-                msg = self.screen.query_one("#messages-log", RichLog)
-                msg.write(f"[bold green]You:[/] {message}")
-
-                event.input.value = ""
+            self.screen.add_message(message, is_peer=True)
 
     async def cleanup_engine(self) -> None:
         """Helper to safely cancel and close the engine."""

@@ -17,3 +17,10 @@ class JoinScreen(Screen):
                 yield LoadingIndicator(id="join-loading", classes="hidden")
                 yield Button("Back", id="btn-back")
         yield Footer()
+
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        if event.button.id == "btn-connect":
+            room_input = self.query_one("#join-code-input", Input)
+            room_id = room_input.value.strip().upper()
+            if len(room_id) == 6:
+                self.app.manager.run_join_sequence(room_id, self)
