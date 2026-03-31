@@ -1,13 +1,10 @@
 import asyncio
 from textual.app import App
-from textual.widgets import Input, Button, Label, LoadingIndicator, RichLog
-from textual.screen import Screen
+from textual.widgets import Input, Button, RichLog
 
+from logic.connection_manager import ConnectionManager
 from screens import StartScreen, HostScreen, JoinScreen, MessagingScreen
 
-from engine.firebase_sync import FirebaseSignaler
-from engine.rtc_engine import RTCEngine
-from constants import FIREBASE_DB_URL
 from utils.id_generator import generate_room_id
 
 
@@ -18,6 +15,7 @@ class PyPeer(App):
     def __init__(self):
         super().__init__()
         self.engine = None
+        self.manager = ConnectionManager(self)
 
     def on_mount(self) -> None:
         self.push_screen(StartScreen())
@@ -27,7 +25,7 @@ class PyPeer(App):
             host_screen = HostScreen()
             await self.push_screen(host_screen)
             room_id = generate_room_id()
-            self.call_after_refresh(self.run_host_sequence, room_id, host_screen)
+            self.call_after_refresh(self.manager.run_host_sequence, room_id, host_screen)
 
         elif event.button.id == "btn-join":
             await self.push_screen(JoinScreen())
@@ -44,75 +42,39 @@ class PyPeer(App):
             room_input = self.screen.query_one("#join-code-input", Input)
             room_id = room_input.value.strip().upper()
             if len(room_id) == 6:
-                await self.run_join_sequence(room_id, self.screen)
+                self.manager.run_join_sequence(room_id, self.screen)
 
         elif event.button.id == "btn-send":
             input_widget = self.screen.query_one("#message-input", Input)
             await self.on_input_submitted(Input.Submitted(input_widget, input_widget.value))
 
-    async def run_host_sequence(self, room_id: str, screen: Screen):
-        status = screen.query_one("#status-label", Label)
-        loader = screen.query_one("#host-loading", LoadingIndicator)
-        room_code = screen.query_one("#host-code-display", Label)
-
-        status.update("Gathering ICE Candidates...")
-
-        self.start_engine(room_id, is_host=True)
-
-        self.attempts = 0
-
-        async def check_ice_status():
-            self.attempts += 1
-            if self.engine and self.engine.pc.iceGatheringState == "complete":
-                loader.add_class("hidden")
-                status.update("[cyan]Room Ready![/] Share this code:")
-                room_code.update(room_id)
-                room_code.remove_class("hidden")
-            elif self.attempts > 150:
-                loader.add_class("hidden")
-                status.update("[red]Failed to create room. Check connection.[/]")
-            else:
-                self.set_timer(0.2, check_ice_status)
-
-        await check_ice_status()
-
-    async def run_join_sequence(self, room_id: str, screen: Screen):
-        screen.query_one("#join-code-input").add_class("hidden")
-        screen.query_one("#btn-connect").add_class("hidden")
-        screen.query_one("#join-status").remove_class("hidden")
-        screen.query_one("#join-loading").remove_class("hidden")
-
-        self.start_engine(room_id, is_host=False)
-
-    def start_engine(self, room_id, is_host):
-        signaler = FirebaseSignaler(FIREBASE_DB_URL, room_id)
-        self.engine = RTCEngine(signaler)
-        self.engine.on_status_callback = self.handle_status_change
-        self.engine.on_message_callback = self.handle_incoming_message
-
-        if is_host:
-            asyncio.create_task(self.engine.setup_as_host())
-        else:
-            asyncio.create_task(self.engine.setup_as_peer())
-
     def handle_status_change(self, status: str) -> None:
-        if status in ["Live", "Connected"]:
-            if not isinstance(self.screen, MessagingScreen):
-                chat_screen = MessagingScreen()
-                self.push_screen(chat_screen)
-        elif status in ["Closed", "Failed", "Disconnected"]:
-            if isinstance(self.screen, MessagingScreen):
-                self.notify("Connection lost. Returning to home.", severity="error")
-                self.pop_screen()
+        success_states = ["Live", "Connected"]
+        failure_states = ["Closed", "Failed", "Disconnected"]
+        pending_states = ["Gathering", "Connecting", "Signaling"]
 
-        self.notify(f"PYPEER: {status}", title="Network Sync")
+        if status in success_states:
+            if not isinstance(self.screen, MessagingScreen):
+                self.push_screen(MessagingScreen())
+            self.notify("Secure P2P tunnel established.", title="PYPEER: ACTIVE", severity="information")
+
+        elif status in failure_states:
+            if isinstance(self.screen, MessagingScreen):
+                self.notify("Peer connection lost. Cleaning up...", title="PYPEER: OFFLINE", severity="error")
+                self.pop_screen()
+            else:
+                self.notify(f"Connection {status.lower()}.", title="PYPEER: ERROR", severity="error")
+
+        elif status in pending_states:
+            self.notify(f"{status}...", title="PYPEER: SYNC", severity="information")
 
     def handle_incoming_message(self, message: str) -> None:
-        try:
-            msg = self.screen.query_one("#messages-log", RichLog)
-            msg.write(f"[bold magenta]Peer:[/] {message}")
-        except Exception:
-            pass
+        if isinstance(self.screen, MessagingScreen):
+            try:
+                msg = self.screen.query_one("#messages-log", RichLog)
+                msg.write(f"[bold magenta]Peer:[/] {message}")
+            except Exception:
+                pass
 
     async def on_input_submitted(self, event: Input.Submitted) -> None:
         if event.input.id == "message-input":
@@ -128,13 +90,13 @@ class PyPeer(App):
     async def cleanup_engine(self) -> None:
         """Helper to safely cancel and close the engine."""
         if self.engine:
+            engine_to_clean = self.engine
+            self.engine = None
             try:
-                await self.engine.signaler.clear_room()
-                await self.engine.close()
+                await asyncio.shield(engine_to_clean.signaler.clear_room())
+                await engine_to_clean.close()
             except Exception as e:
                 self.log(f"Cleanup error: {e}")
-            finally:
-                self.engine = None
 
     async def on_unmount(self) -> None:
         await self.cleanup_engine()
