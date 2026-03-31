@@ -1,13 +1,9 @@
 import asyncio
-from textual.app import App, ComposeResult
-from textual.widgets import Header, Footer, Input, Button, Label, LoadingIndicator, RichLog
-from textual.containers import Horizontal, Vertical, Container
+from textual.app import App
+from textual.widgets import Input, Button, Label, LoadingIndicator, RichLog
 from textual.screen import Screen
 
-from screens.start import StartScreen
-from screens.host import HostScreen
-from screens.join import JoinScreen
-from screens.chat import MessagingScreen
+from screens import StartScreen, HostScreen, JoinScreen, MessagingScreen
 
 from engine.firebase_sync import FirebaseSignaler
 from engine.rtc_engine import RTCEngine
