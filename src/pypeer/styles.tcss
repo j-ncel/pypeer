@@ -123,6 +123,14 @@ Button {
     text-style: bold;
 }
 
+#host-code-display:hover {
+    background: $primary_color;
+    color: black;
+    text-align: center;
+    padding: 1;
+    text-style: bold;
+}
+
 LoadingIndicator {
     width: 32;
     color: $primary_color;
