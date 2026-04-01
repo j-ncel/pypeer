@@ -32,3 +32,14 @@ class JoinScreen(Screen):
                 self.app.manager.run_join_sequence(room_id, password, self)
             else:
                 self.notify("Room ID must be 6 characters.", severity="error")
+
+    def reset_view(self) -> None:
+        self.query_one("#join-code-input").remove_class("hidden")
+        self.query_one("#join-password-input").remove_class("hidden")
+        self.query_one("#btn-connect").remove_class("hidden")
+        self.query_one("#btn-back").remove_class("hidden")
+
+        self.query_one("#join-status").add_class("hidden")
+        self.query_one("#join-loading").add_class("hidden")
+
+        self.query_one("#join-password-input").focus()

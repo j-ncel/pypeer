@@ -110,7 +110,12 @@ class RTCEngine:
             self._notify_status("Timeout: Room Not Found")
             await self.close()
         except Exception as e:
-            self._notify_status(f"Error: {str(e)}")
+            if "AUTH_FAILED" in str(e):
+                self._notify_status(f"Error: Incorrect Password")
+            elif isinstance(e, asyncio.TimeoutError):
+                self._notify_status("Timeout: Room Not Found")
+            else:
+                self._notify_status(f"Error: {str(e)}")
             await self.close()
 
     async def _wait_for_ice(self):

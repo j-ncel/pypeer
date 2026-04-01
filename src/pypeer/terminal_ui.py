@@ -64,6 +64,12 @@ class PyPeer(App):
         failure_states = ["Closed", "Failed", "Disconnected"]
         pending_states = ["Gathering", "Connecting", "Signaling"]
 
+        if "Error: Incorrect Password" in status:
+            self.notify("Handshake failed: Check your password.", severity="error", title="PYPEER: AUTH")
+            if isinstance(self.screen, JoinScreen):
+                self.screen.reset_view()
+            return
+
         if not self._is_mounted or not self.screen_stack:
             return
 

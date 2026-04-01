@@ -2,7 +2,7 @@ import httpx
 import json
 import base64
 import hashlib
-from cryptography.fernet import Fernet
+from cryptography.fernet import Fernet, InvalidToken
 import zlib
 
 
@@ -42,14 +42,19 @@ class FirebaseSignaler:
                         encrypted_string = wrapper.get("data", {}).get("payload")
 
                         if encrypted_string:
-                            decrypted_bytes = self.cipher.decrypt(encrypted_string.encode())
-                            decompressed_json = zlib.decompress(decrypted_bytes)
-                            actual_data = json.loads(decompressed_json)
+                            try:
+                                decrypted_bytes = self.cipher.decrypt(encrypted_string.encode())
+                                decompressed_json = zlib.decompress(decrypted_bytes)
+                                actual_data = json.loads(decompressed_json)
 
-                            if isinstance(actual_data, dict) and "sdp" in actual_data:
-                                return actual_data
+                                if isinstance(actual_data, dict) and "sdp" in actual_data:
+                                    return actual_data
+                            except InvalidToken:
+                                raise Exception("AUTH_FAILED")
 
-                    except Exception:
+                    except Exception as e:
+                        if str(e) == "AUTH_FAILED":
+                            raise e
                         continue
         return None
 
