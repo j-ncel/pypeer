@@ -1,5 +1,9 @@
 import httpx
 import json
+import base64
+import hashlib
+from cryptography.fernet import Fernet
+import zlib
 
 
 class FirebaseSignaler:
@@ -7,9 +11,17 @@ class FirebaseSignaler:
         self.base_url = f"{base_url.rstrip('/')}/rooms/{room_id}"
         self.client = httpx.AsyncClient(timeout=None)
 
+        key_seed = hashlib.sha256(room_id.encode()).digest()
+        self.cipher = Fernet(base64.urlsafe_b64encode(key_seed))
+
     async def post_signal(self, key: str, data: dict):
         url = f"{self.base_url}/{key}.json"
-        response = await self.client.put(url, json=data)
+
+        json_data = json.dumps(data).encode()
+        compressed_data = zlib.compress(json_data)
+        encrypted_data = self.cipher.encrypt(compressed_data).decode()
+
+        response = await self.client.put(url, json={"payload": encrypted_data})
         response.raise_for_status()
 
     async def wait_for_signal(self, key: str):
@@ -25,19 +37,27 @@ class FirebaseSignaler:
                     if not data_payload or data_payload == "null":
                         continue
                     try:
-                        payload_json = json.loads(data_payload)
-                        actual_data = payload_json.get("data")
+                        wrapper = json.loads(data_payload)
+                        encrypted_string = wrapper.get("data", {}).get("payload")
 
-                        if isinstance(actual_data, dict) and "sdp" in actual_data:
-                            return actual_data
+                        if encrypted_string:
+                            decrypted_bytes = self.cipher.decrypt(encrypted_string.encode())
+                            decompressed_json = zlib.decompress(decrypted_bytes)
+                            actual_data = json.loads(decompressed_json)
 
-                    except (json.JSONDecodeError, TypeError):
+                            if isinstance(actual_data, dict) and "sdp" in actual_data:
+                                return actual_data
+
+                    except Exception:
                         continue
         return None
 
     async def clear_room(self):
         url = f"{self.base_url}.json"
-        await self.client.delete(url)
+        try:
+            await self.client.delete(url)
+        except Exception:
+            pass
 
     async def close(self):
         await self.client.aclose()
