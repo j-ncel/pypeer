@@ -1,34 +1,42 @@
 import httpx
-import asyncio
+import json
 
 
 class FirebaseSignaler:
     def __init__(self, base_url: str, room_id: str):
-        self.base_url = base_url.rstrip("/")
-        self.room_id = room_id
-        self.client = httpx.AsyncClient()
+        self.base_url = f"{base_url.rstrip('/')}/rooms/{room_id}"
+        self.client = httpx.AsyncClient(timeout=None)
 
     async def post_signal(self, key: str, data: dict):
-        """Uploads offer or answer to Firebase."""
-        url = f"{self.base_url}/rooms/{self.room_id}/{key}.json"
-        await self.client.put(url, json=data)
+        url = f"{self.base_url}/{key}.json"
+        response = await self.client.put(url, json=data)
+        response.raise_for_status()
 
     async def wait_for_signal(self, key: str):
-        """Polls Firebase until the specific key (offer/answer) exists."""
-        url = f"{self.base_url}/rooms/{self.room_id}/{key}.json"
-        while True:
-            try:
-                res = await self.client.get(url)
-                data = res.json()
-                if data:
-                    return data
-            except Exception:
-                pass
-            await asyncio.sleep(1)
+        url = f"{self.base_url}/{key}.json"
+        headers = {"Accept": "text/event-stream"}
+
+        async with self.client.stream("GET", url, headers=headers) as response:
+            async for line in response.aiter_lines():
+                if not line.strip() or line.startswith(":"):
+                    continue
+                if line.startswith("data:"):
+                    data_payload = line[5:].strip()
+                    if not data_payload or data_payload == "null":
+                        continue
+                    try:
+                        payload_json = json.loads(data_payload)
+                        actual_data = payload_json.get("data")
+
+                        if isinstance(actual_data, dict) and "sdp" in actual_data:
+                            return actual_data
+
+                    except (json.JSONDecodeError, TypeError):
+                        continue
+        return None
 
     async def clear_room(self):
-        """Cleans up the signaling data once connection is live."""
-        url = f"{self.base_url}/rooms/{self.room_id}.json"
+        url = f"{self.base_url}.json"
         await self.client.delete(url)
 
     async def close(self):
