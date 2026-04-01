@@ -70,7 +70,7 @@ class PyPeer(App):
                 self.notify("Peer connection lost. Cleaning up...", title="PYPEER: OFFLINE", severity="error")
                 self.pop_screen()
             else:
-                self.notify(f"Connection {status.lower()}.", title="PYPEER: ERROR", severity="error")
+                self.notify(f"Connection {status.lower()}.", title="PYPEER: OFFLINE", severity="error")
 
         elif status in pending_states:
             self.notify(f"{status}...", title="PYPEER: SYNC", severity="information")
