@@ -144,20 +144,42 @@ LoadingIndicator {
 
 #chat-main {
     height: 100%;
-    padding: 2;
+    padding: 1 2;
     border: tall $input_border;
 }
 
 #messages-log {
     height: 1fr;
-    padding: 1;
+    background: $in_background;
+    margin-bottom: 1;
 }
 
 #input-container {
     height: 4;
-    margin-top: 1;
+    width: 100%;
 }
 
-#message-input {
+TextArea#message-input {
     width: 1fr;
+    height: 100%;
+    background: $input_background;
+    color: white;
+    border: tall $input_border;
+}
+
+TextArea#message-input:focus {
+    border: tall $primary_color;
+}
+
+#btn-send {
+    width: 12;
+    height: 3;
+    margin-left: 1;
+    background: $primary_color;
+    color: black;
+    text-style: bold;
+}
+
+#btn-send:hover {
+    background: white;
 }
