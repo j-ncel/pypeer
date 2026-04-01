@@ -2,3 +2,5 @@ textual
 aiortc
 httpx
 cryptography
+pytest
+pytest-asyncio

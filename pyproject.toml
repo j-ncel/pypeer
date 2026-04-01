@@ -1,0 +1,53 @@
+[build-system]
+requires = ["setuptools>=61.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pypeer"
+version = "0.1.0"
+description = "A terminal-based P2P messaging application using WebRTC"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+    { name = "Juncel Datinggaling", email = "juncel.datinggaling@gmail.com" }
+]
+keywords = ["p2p", "webrtc", "terminal", "chat", "messaging", "tui"]
+classifiers = [
+    "Environment :: Console",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Communications :: Chat",
+    "Operating System :: OS Independent",
+]
+
+dependencies = [
+    "httpx>=0.28.1",
+    "textual>=8.2.0",
+    "cryptography>=46.0.6",
+    "aiortc>=1.14.0",
+]
+
+[project.scripts]
+pypeer = "pypeer.main:app"
+
+[project.urls]
+Homepage = "https://github.com/j-ncel/pypeer"
+Repository = "https://github.com/j-ncel/pypeer"
+Issues = "https://github.com/j-ncel/pypeer/issues"
+
+[tool.setuptools]
+license-files = ["LICENSE"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["pypeer*"]
+exclude = ["tests*", "demo*", "docs*"]
+
+[tool.setuptools.package-data]
+pypeer = ["*.tcss"]
