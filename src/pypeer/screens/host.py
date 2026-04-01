@@ -1,6 +1,6 @@
 import re
 from textual.app import ComposeResult
-from textual.widgets import Header, Footer, Button, Label, LoadingIndicator
+from textual.widgets import Header, Footer, Button, Label, LoadingIndicator, Input
 from textual.containers import Vertical, Container
 from textual.screen import Screen
 
@@ -14,8 +14,12 @@ class HostScreen(Screen):
             yield Label("PYPEER", id="app-title")
             yield Label("Python Terminal P2P Messaging", id="app-description")
             with Vertical(id="host-view"):
-                yield LoadingIndicator(id="host-loading")
-                yield Label("Creating Room...", id="status-label")
+
+                yield Input(placeholder="Optional Password", id="host-password-input", password=True)
+                yield Button("Create Room", variant="primary", id="btn-start-hosting")
+
+                yield LoadingIndicator(id="host-loading", classes="hidden")
+                yield Label("Creating Room...", id="status-label", classes="hidden")
 
                 code_label = Label("", id="host-code-display", classes="hidden")
                 code_label.can_focus = True
@@ -23,6 +27,17 @@ class HostScreen(Screen):
 
                 yield Button("Cancel", id="btn-back")
         yield Footer()
+
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        if event.button.id == "btn-start-hosting":
+            self.query_one("#host-password-input").add_class("hidden")
+            self.query_one("#btn-start-hosting").add_class("hidden")
+
+            self.query_one("#host-loading").remove_class("hidden")
+            self.query_one("#status-label").remove_class("hidden")
+
+            password = self.query_one("#host-password-input", Input).value.strip()
+            self.app.start_hosting_sequence(password)
 
     def on_click(self, event) -> None:
         label = self.query_one("#host-code-display", Label)

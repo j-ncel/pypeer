@@ -27,16 +27,23 @@ class PyPeer(App):
 
     async def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "btn-host":
-            host_screen = HostScreen()
-            await self.push_screen(host_screen)
-            room_id = generate_room_id()
-            self.call_after_refresh(self.manager.run_host_sequence, room_id, host_screen)
+            await self.push_screen(HostScreen())
 
         elif event.button.id == "btn-join":
             await self.push_screen(JoinScreen())
 
         elif event.button.id == "btn-back":
             await self.action_back()
+
+    def start_hosting_sequence(self, password: str) -> None:
+        room_id = generate_room_id()
+        if isinstance(self.screen, HostScreen):
+            self.call_after_refresh(
+                self.manager.run_host_sequence,
+                room_id,
+                password,
+                self.screen
+            )
 
     async def action_back(self) -> None:
         if self.engine:

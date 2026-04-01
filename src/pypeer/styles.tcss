@@ -86,20 +86,19 @@ Button {
     text-style: bold;
 }
 
-#btn-join:hover, #btn-send:hover {
-    background: $primary_color;
-    color: black;
-    text-style: bold;
-}
-
-
-#join-code-input {
+#join-code-input, #join-password-input, #host-password-input{
     width: 30;
 }
 
-#btn-join, #btn-send {
+#btn-join, #btn-send, #btn-start-hosting {
     color: $primary_color;
     border: tall $primary_color;
+}
+
+#btn-join:hover, #btn-send:hover, #btn-start-hosting {
+    background: $primary_color;
+    color: black;
+    text-style: bold;
 }
 
 #btn-back {

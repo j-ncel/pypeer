@@ -7,11 +7,12 @@ import zlib
 
 
 class FirebaseSignaler:
-    def __init__(self, base_url: str, room_id: str):
+    def __init__(self, base_url: str, room_id: str, password: str = ""):
         self.base_url = f"{base_url.rstrip('/')}/rooms/{room_id}"
         self.client = httpx.AsyncClient(timeout=None)
 
-        key_seed = hashlib.sha256(room_id.encode()).digest()
+        secret = f"{room_id}{password}"
+        key_seed = hashlib.sha256(secret.encode()).digest()
         self.cipher = Fernet(base64.urlsafe_b64encode(key_seed))
 
     async def post_signal(self, key: str, data: dict):

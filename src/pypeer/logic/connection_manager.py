@@ -10,8 +10,8 @@ class ConnectionManager:
     def __init__(self, app):
         self.app = app
 
-    def start_engine(self, room_id, is_host):
-        signaler = FirebaseSignaler(FIREBASE_DB_URL, room_id)
+    def start_engine(self, room_id, is_host, password=""):
+        signaler = FirebaseSignaler(FIREBASE_DB_URL, room_id, password)
         self.app.engine = RTCEngine(signaler)
         self.app.engine.on_status_callback = self.app.handle_status_change
         self.app.engine.on_message_callback = self.app.handle_incoming_message
@@ -21,13 +21,13 @@ class ConnectionManager:
         else:
             asyncio.create_task(self.app.engine.setup_as_peer())
 
-    def run_host_sequence(self, room_id: str, screen: Screen):
+    def run_host_sequence(self, room_id, password, screen: Screen):
         status = screen.query_one("#status-label", Label)
         loader = screen.query_one("#host-loading", LoadingIndicator)
         room_code = screen.query_one("#host-code-display", Label)
 
         status.update("Gathering ICE Candidates...")
-        self.start_engine(room_id, is_host=True)
+        self.start_engine(room_id, is_host=True, password=password)
 
         attempts = 0
 
@@ -51,10 +51,10 @@ class ConnectionManager:
 
         screen.set_timer(0.2, check_ice_status)
 
-    def run_join_sequence(self, room_id: str, screen: Screen):
+    def run_join_sequence(self, room_id, password, screen: Screen):
         screen.query_one("#join-code-input").add_class("hidden")
         screen.query_one("#btn-connect").add_class("hidden")
         screen.query_one("#join-status").remove_class("hidden")
         screen.query_one("#join-loading").remove_class("hidden")
 
-        self.start_engine(room_id, is_host=False)
+        self.start_engine(room_id, is_host=False, password=password)
