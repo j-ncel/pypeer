@@ -110,5 +110,9 @@ class PyPeer(App):
         await self.cleanup_engine()
 
 
-if __name__ == "__main__":
+def app():
     PyPeer().run()
+
+
+if __name__ == "__main__":
+    app()
