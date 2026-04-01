@@ -6,7 +6,7 @@ from textual.screen import Screen
 
 
 class HostScreen(Screen):
-    BINDINGS = [("c", "action_copy_code", "Copy Code")]
+    BINDINGS = [("c", "copy_code", "Copy Code")]
 
     def compose(self) -> ComposeResult:
         yield Header(show_clock=True, icon="P")

@@ -26,6 +26,8 @@ class RTCEngine:
         self._notify_status(state.capitalize())
 
         if state in ["failed", "closed", "disconnected"]:
+            if self.on_status_callback:
+                self.on_status_callback("Disconnected")
             await self.close()
 
     def _on_datachannel(self, channel):

@@ -42,7 +42,7 @@ class PyPeer(App):
         if self.engine:
             self.notify("Cleaning up session...", title="PYPEER")
             asyncio.create_task(self.cleanup_engine())
-        if len(self.screen_stack) > 1:
+        if len(self.screen_stack) > 2:
             self.pop_screen()
         else:
             self.exit()
@@ -67,10 +67,12 @@ class PyPeer(App):
 
         elif status in failure_states:
             if isinstance(self.screen, MessagingScreen):
-                self.notify("Peer connection lost. Cleaning up...", title="PYPEER: OFFLINE", severity="error")
-                self.pop_screen()
+                self.notify("Peer connection lost. Returning to Menu.", title="PYPEER: OFFLINE", severity="error")
+                while len(self.screen_stack) > 2:
+                    self.pop_screen()
+                asyncio.create_task(self.cleanup_engine())
             else:
-                self.notify(f"Connection {status.lower()}.", title="PYPEER: OFFLINE", severity="error")
+                self.notify(f"Connection {status.lower()}.", severity="error")
 
         elif status in pending_states:
             self.notify(f"{status}...", title="PYPEER: SYNC", severity="information")
