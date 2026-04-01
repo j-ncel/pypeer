@@ -4,6 +4,7 @@ import base64
 import hashlib
 from cryptography.fernet import Fernet, InvalidToken
 import zlib
+import time
 
 
 class FirebaseSignaler:
@@ -22,7 +23,12 @@ class FirebaseSignaler:
         compressed_data = zlib.compress(json_data)
         encrypted_data = self.cipher.encrypt(compressed_data).decode()
 
-        response = await self.client.put(url, json={"payload": encrypted_data})
+        payload = {
+            "payload": encrypted_data,
+            "timestamp": int(time.time() * 1000)
+        }
+
+        response = await self.client.put(url, json=payload)
         response.raise_for_status()
 
     async def wait_for_signal(self, key: str):
