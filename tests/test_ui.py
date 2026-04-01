@@ -1,5 +1,5 @@
 import pytest
-from pypeer.terminal_ui import PyPeer
+from pypeer.main import PyPeer
 from pypeer.screens import JoinScreen, HostScreen
 
 

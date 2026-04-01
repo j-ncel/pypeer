@@ -1,6 +1,5 @@
 import pytest
 import asyncio
-import os
 from pypeer.engine.signaler import FirebaseSignaler
 from pypeer.constants import FIREBASE_DB_URL
 
