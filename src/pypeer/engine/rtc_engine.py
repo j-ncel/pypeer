@@ -1,6 +1,6 @@
 from aiortc import RTCPeerConnection, RTCSessionDescription, RTCConfiguration, RTCIceServer
 import asyncio
-from constants import ICE_SERVERS
+from pypeer.constants import ICE_SERVERS
 
 
 class RTCEngine:

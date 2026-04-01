@@ -1,9 +1,9 @@
 import asyncio
 from textual.screen import Screen
 from textual.widgets import Label, LoadingIndicator
-from engine.firebase_sync import FirebaseSignaler
-from engine.rtc_engine import RTCEngine
-from constants import FIREBASE_DB_URL
+from pypeer.engine.signaler import FirebaseSignaler
+from pypeer.engine.rtc_engine import RTCEngine
+from pypeer.constants import FIREBASE_DB_URL
 
 
 class ConnectionManager:

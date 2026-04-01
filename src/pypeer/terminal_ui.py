@@ -1,11 +1,11 @@
 import asyncio
 from textual.app import App
-from textual.widgets import Input, Button, RichLog
+from textual.widgets import Button
 
-from logic.connection_manager import ConnectionManager
-from screens import StartScreen, HostScreen, JoinScreen, MessagingScreen
+from pypeer.logic.connection_manager import ConnectionManager
+from pypeer.screens import StartScreen, HostScreen, JoinScreen, MessagingScreen
 
-from utils.id_generator import generate_room_id
+from pypeer.utils.id_generator import generate_room_id
 
 
 class PyPeer(App):
