@@ -1,5 +1,5 @@
 <p align="center">
-    <img alt="pypeer Logo" src="docs/pypeer.png" width="400" />
+    <img alt="pypeer Logo" src="https://raw.githubusercontent.com/j-ncel/pypeer/refs/heads/main/docs/pypeer.png" width="400" />
 </p>
 
 <p align="center">
@@ -19,21 +19,21 @@
     <tr>
       <td align="center">
         <b>Start Screen</b><br>
-        <img alt="pypeer home" src="docs/start.png" width="400" />
+        <img alt="pypeer home" src="https://raw.githubusercontent.com/j-ncel/pypeer/main/docs/start.png" width="400" />
       </td>
       <td align="center">
         <b>Host Setup</b><br>
-        <img alt="pypeer host" src="docs/host.png" width="400" />
+        <img alt="pypeer host" src="https://raw.githubusercontent.com/j-ncel/pypeer/main/docs/host.png" width="400" />
       </td>
     </tr>
     <tr>
       <td align="center">
         <b>Join Room</b><br>
-        <img alt="pypeer join" src="docs/join.png" width="400" />
+        <img alt="pypeer join" src="https://raw.githubusercontent.com/j-ncel/pypeer/main/docs/join.png" width="400" />
       </td>
       <td align="center">
         <b>Messaging Screen</b><br>
-        <img alt="pypeer messaging" src="docs/messaging.png" width="400" />
+        <img alt="pypeer messaging" src="https://raw.githubusercontent.com/j-ncel/pypeer/main/docs/messaging.png" width="400" />
       </td>
     </tr>
   </table>
@@ -98,14 +98,14 @@ After installation launch the application by simply typing:
 
 2.  **The WebRTC Handshake:** Once the encrypted metadata is exchanged, the terminals move from "talking to the cloud" to "talking to each other":
     - **Firewall Navigation:** The app uses Google's STUN servers to navigate through home routers and firewalls and determine the best route between peers.
-    - **Encrypted DataChannel:** A dedicated tunnel is established between peers. Unlike traditional TCP sockets, SCTP over WebRTC provides native encryption, reliability, and ordered delivery without needing a central server.
+    - **Encrypted DataChannel:** A dedicated tunnel is established between peers. Unlike traditional TCP sockets, SCTP over WebRTC provides native encryption, reliability, and ordered delivery without the need for a central server.
 
 3.  **Secure Direct Messaging:** Once connected, the chat enters a serverless state:
     - **Zero-Trace Handshake:** The signaling data on Firebase RTDB is deleted. The peers remain connected directly, ensuring that no trace of the handshake remains on the cloud.
     - **P2P Memory-to-Memory:** Messages are sent directly between terminal memories. No history is stored on any server, and no middleman can intercept the traffic once the P2P tunnel is established.
     - **Volatile Sessions:** Your messages exist only as long as your terminal window is open. Once you quit, the session is wiped from your RAM.
 
-4.  **Automated Cleanup:** To maintaina a clean and secure signaling bridge, `pypeer` employs a two-tier cleanup strategy:
+4.  **Automated Cleanup:** To maintain a a clean and secure signaling bridge, `pypeer` employs a two-tier cleanup strategy:
     - **Host-Led Deletion:** Under normal conditions, the host cleans up the signaling metadata as soon as the handshake is complete.
     - **GitHub Action Janitor:** As a failsafe, a scheduled GitHub Action acts as a "Janitor," running every hour to automatically purge any stale or abandoned rooms left behind by interrupted connections.
 
