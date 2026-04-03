@@ -11,6 +11,7 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S"
 )
+logging.getLogger("httpx").setLevel(logging.WARNING)
 
 DB_URL = os.getenv("FIREBASE_DB_URL")
 DB_SECRET = os.getenv("FIREBASE_DB_SECRET")
